@@ -11,7 +11,19 @@ client.on('ready', () => {
 client.on('message', msg => {
     if (msg.content.startsWith(prefix)) {
         let command = msg.content.slice(prefix.length);
-        console.log(command);
+        let args = command.split(' ');
+        
+        switch (args[0]) {
+            case 'report':
+                let username = args[1], reason = args[2];
+                let reports = require("./reports.json");
+                reports.reports.push(username, reason);
+
+                let fs = require('fs');
+                fs.writeFile('reports.json', reports, function (err) {
+                    if (err) return console.log(err);
+                });
+        }
     }
 });
 
