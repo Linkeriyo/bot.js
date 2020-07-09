@@ -15,13 +15,18 @@ client.on('message', msg => {
         
         switch (args[0]) {
             case 'report':
-                let username = args[1], reason = args[2];
+                let username = args[1], reason = command.slice(args[0].length + args[1].length + 2);
                 let reports = require("./reports.json");
-                reports.reports.push(username, reason);
+                reports.reports.push({
+                    reportID: (reports.lastID + 1), username: username, reason: reason
+                });
+
+                reports.lastID = reports.reports[reports.reports.length - 1].reportID;
 
                 let fs = require('fs');
-                fs.writeFile('reports.json', reports, function (err) {
+                fs.writeFile('reports.json', JSON.stringify(reports), function (err) {
                     if (err) return console.log(err);
+                    else msg.reply(`${username} reportado con ID: ${reports.lastID}`);
                 });
         }
     }
