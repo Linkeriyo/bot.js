@@ -39,17 +39,24 @@ client.on('message', msg => {
                     let reports = require("./reports.json");
                     let toSend = '';
                     let pendingReports = 0;
-                    let embeds;
+                    let embeds = [];
+                    let message = new Discord.Message();
 
                     reports.reports.forEach(report => {
                         if (report.pending) {
                             pendingReports+=1;
-                            toSend = toSend.concat(`\`ID: ${report.reportID}name: ${report.username}\nreason: ${report.reason}\``);
-                            console.log(toSend);
+                            embeds.push(new Discord.MessageEmbed().addFields(
+                                { name: 'name', value: report.username },
+                                { name: 'reason', value: report.reason }
+                            )
+                            .setFooter(`ID: ${report.reportID}`));
                         }
                     });
+
+                    message.embeds = embeds;
+
                     if (pendingReports >= 0) {
-                        msg.member.user.send(`${pendingReports} reportes pendientes:\n` + toSend);
+                        msg.member.user.send(message);
                     } else {
                         msg.member.user.send('no hay reportes pendientes :D');
                     }
