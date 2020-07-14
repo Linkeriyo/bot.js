@@ -32,34 +32,58 @@ client.on('message', msg => {
                     else msg.reply(`${username} reportado con ID: ${reports.lastID}`);
                 });
                 break;
-            
-            case 'review':
-                if (msg.member.hasPermission("ADMINISTRATOR")) {
-                    msg.reply('check dm')
-                    let reports = require("./reports.json");
-                    let toSend = '';
-                    let pendingReports = 0;
-                    let embeds = [];
-                    let message = new Discord.Message();
 
+            case 'review':
+                if (args[1] === 'done') {
+                    let id = args[2];
+                    let reports = require("./reports.json");
+                    let found = false;
                     reports.reports.forEach(report => {
-                        if (report.pending) {
-                            pendingReports+=1;
-                            embeds.push(new Discord.MessageEmbed().addFields(
-                                { name: 'name', value: report.username },
-                                { name: 'reason', value: report.reason }
-                            )
-                            .setFooter(`ID: ${report.reportID}`));
+                        if (report.reportID == id && report.pending) {
+                            found = true;
+                            let fs = require('fs');
+                            fs.writeFile('reports.json', JSON.stringify(reports), function (err) {
+                                if (err) return console.log(err);
+                                else msg.reply(`reporte con ID: ${id} marcado como revisado`);
+                            });
                         }
                     });
 
-                    message.embeds = embeds;
-
-                    if (pendingReports >= 0) {
-                        msg.member.user.send(message);
-                    } else {
-                        msg.member.user.send('no hay reportes pendientes :D');
+                    if (!found) {
+                        msg.reply(`no se ha encontrado ningún reporte activo con ID: ${id}`);
                     }
+                } else {
+                    if (msg.channel.guild != null) {
+                        if (msg.member.hasPermission("ADMINISTRATOR")) {
+                            msg.reply('check dm')
+                            let reports = require("./reports.json");
+                            let toSend = '';
+                            let pendingReports = 0;
+
+                            reports.reports.forEach(report => {
+                                if (report.pending) {
+                                    pendingReports += 1;
+                                    toSend = toSend.concat(`ID: ${report.reportID}\nname: ${report.username}\nreason: ${report.reason}\n\n`);
+                                }
+                            });
+
+                            if (pendingReports >= 0) {
+                                if (pendingReports != 1) {
+                                    msg.member.user.send(`hay ${pendingReports} reportes pendientes\n\n` + toSend);
+                                } else {
+                                    msg.member.user.send(`hay un reporte pendiente\n\n` + toSend);
+                                }
+
+                            } else {
+                                msg.member.user.send('no hay reportes pendientes :D');
+                            }
+                        } else {
+                            msg.reply('debes ser administrador del servidor para usar este comando');
+                        }
+                    } else {
+                        msg.reply('este comando se debe usar en un servidor');
+                    }
+
                 }
                 break;
         }
