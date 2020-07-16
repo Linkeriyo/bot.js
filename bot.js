@@ -55,7 +55,7 @@ client.on('message', msg => {
                 } else {
                     if (msg.channel.guild != null) {
                         if (msg.member.hasPermission("ADMINISTRATOR")) {
-                            msg.reply('check dm')
+                            msg.reply('check dm');
                             let reports = require("./reports.json");
                             let toSend = '';
                             let pendingReports = 0;
@@ -83,8 +83,11 @@ client.on('message', msg => {
                     } else {
                         msg.reply('este comando se debe usar en un servidor');
                     }
-
                 }
+                break;
+            case 'playo':
+                playo = msg.mentions[0];
+                msg.channel.send(playo + ', eres un playo.');
                 break;
         }
     }
