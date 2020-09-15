@@ -85,10 +85,37 @@ client.on('message', msg => {
                     }
                 }
                 break;
-            case 'playo':
-                playo = msg.mentions[0];
-                msg.channel.send(playo + ', eres un playo.');
+
+            case 'playo?':
+                let playos = require("./playos.json");
+                let isPlayo = false;
+                playos.forEach(user => {
+                    if (user.userID == msg.author.id) {
+                        if (user.playoCount > 0) {
+                            msg.reply('has sido playo ' + user.playoCount + ' veces');
+                            isPlayo = true;
+                        }
+                    }
+                });
+
+                if (isPlayo == false) {
+                    msg.reply('no eres playo');
+                }
                 break;
+
+            case 'playo':
+                let playos = require("./playos.json");
+                playos.forEach(user => {
+                    if (user.userID == msg.mentions.users.get(0).id) {
+                        user.playoCount++;
+                    }
+                });
+
+                let fs = require('fs');
+                fs.writeFile('playos.json', JSON.stringify(playos), function (err) {
+                    if (err) return console.log(err);
+                    else msg.reply(msg.mentions.users.get(0).username + ` ha sido un playo`);
+                });
         }
     }
 });
